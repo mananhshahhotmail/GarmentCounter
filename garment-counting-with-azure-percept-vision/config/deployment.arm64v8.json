@@ -1,0 +1,134 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "361d": {
+                "username": "RMVisionContainerRegistry",
+                "password": "2EQMnw/kgl4yKjjf=pGtNk2jo1gqmDLH",
+                "address": "rmvisioncontainerregistry.azurecr.io"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.1",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.1",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            }
+          }
+        },
+        "modules": {
+          "WebStreamModule": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/webstreammodule:preload-devkit",
+              "createOptions": "{\"ExposedPorts\":{\"2999/tcp\":{},\"3000/tcp\":{},\"3002/tcp\":{},\"3004/tcp\":{},\"3006/tcp\":{},\"3008/tcp\":{},\"3010/tcp\":{}},\"HostConfig\":{\"PortBindings\":{\"2999/tcp\":[{\"HostPort\":\"2999\"}],\"3000/tcp\":[{\"HostPort\":\"3000\"}],\"3002/tcp\":[{\"HostPort\":\"3002\"}],\"3004/tcp\":[{\"HostPort\":\"3004\"}],\"3006/tcp\":[{\"HostPort\":\"3006\"}],\"3008/tcp\":[{\"HostPort\":\"3008\"}],\"3010/tcp\":[{\"HostPort\":\"3010\"}]}}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+              "RTSP_IP": {
+                "value": "azureeyemodule"
+              },
+              "RTSP_PORT": {
+                "value": "8554"
+              },
+              "RTSP_PATH": {
+                "value": "result"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "GarmentCountModule": {
+            "version": "1.1",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "rmvisioncontainerregistry.azurecr.io/garmentcountmodule:0.0.16-arm64v8",
+              "createOptions": "{}"
+            }
+          },
+          "azureearspeechclientmodule": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/azureearspeechclientmodule:preload-devkit",
+              "createOptions": "{\"HostConfig\":{\"Privileged\":true,\"Binds\":[\"/dev:/dev\"]}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "azureeyemodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/azureeyemodule:2108-1",
+              "createOptions": "{\"ExposedPorts\":{\"8554/tcp\":{}},\"HostConfig\":{\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\"],\"Privileged\":true,\"DeviceCgroupRules\":[\"c 189:* rmw\"],\"PortBindings\":{\"8554/tcp\":[{\"HostPort\":\"8554\"}]}}}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "AzureEyeToCountModule": "FROM /messages/modules/azureeyemodule/outputs/* INTO BrokeredEndpoint(\"/modules/GarmentCountModule/inputs/CountInput\")",
+          "CountModuleToHub": "FROM /messages/modules/GarmentCountModule/outputs/* INTO $upstream",
+          "AzureSpeechToCountModule": "FROM /messages/modules/azureearspeechclientmodule/outputs/* INTO BrokeredEndpoint(\"/modules/GarmentCountModule/inputs/EarInput\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "azureeyemodule": {
+      "properties.desired": {
+        "Logging": true,
+        "ModelZipUrl": "https://aedsamples.blob.core.windows.net/vision/aeddevkitnew/person-detection-retail-0013.zip",
+        "RawStream": true,
+        "ResultStream": true,
+        "Running": true,
+        "TelemetryInterval": 10
+      }
+    },
+    "azureearspeechclientmodule": {
+      "properties.desired": {
+        "speechConfigs": {
+          "appId": "21778e40-a32a-11ec-b700-ebbffe1b8e84",
+          "key": "6032649c9f544f949630828055e2f615",
+          "region": "westus",
+          "keywordModelUrl": "https://aedspeechscenarios.blob.core.windows.net/keyword-tables/computer.table",
+          "keyword": "computer",
+          "skillType": "xxx",
+          "speechLogFile": "speech.log"
+        },
+        "deviceConfigs": {
+          "volume": 45,
+          "enableSendAppLog": false
+        }
+      }
+    }
+  }
+}
