@@ -63,7 +63,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "rmvisioncontainerregistry.azurecr.io/garmentcountmodule:0.0.16-arm64v8",
+              "image": "rmvisioncontainerregistry.azurecr.io/garmentcountmodule:0.0.37-arm64v8",
               "createOptions": "{}"
             }
           },
@@ -116,7 +116,7 @@
     "azureearspeechclientmodule": {
       "properties.desired": {
         "speechConfigs": {
-          "appId": "21778e40-a32a-11ec-b700-ebbffe1b8e84",
+          "appId": "6f586ab0-a3e0-11ec-b700-ebbffe1b8e84",
           "key": "6032649c9f544f949630828055e2f615",
           "region": "westus",
           "keywordModelUrl": "https://aedspeechscenarios.blob.core.windows.net/keyword-tables/computer.table",
